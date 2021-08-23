@@ -4,7 +4,9 @@ const cors = require('cors');
 const app = express();
 
 // Basic Configuration
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
+
+express.urlencoded({extended: true});
 
 app.use(cors());
 
