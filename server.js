@@ -77,14 +77,20 @@ async function createAndSaveUrl(url_to_shorten) {
 async function retrieve_url(req, res) {
   let url_to_shorten = req.body.url;
   let shortened = await createAndSaveUrl(url_to_shorten);
-  console.log(shortened);
+  // console.log(shortened);
   res.json({"original_url": url_to_shorten, "short_url":shortened});
 }
 
 
 async function redirect(req, res) {
   let short = req.params.short_url;
-  let urlDoc = await urlModel.findOne({short_url: short});
+  let urlDoc = null;
+  try {
+  urlDoc = await urlModel.findOne({short_url: short});
+  }
+  catch {
+    console.log("database not conncting potentially, otherwise standard error")
+  }
 
   if(urlDoc == null) {
     res.json({"error":"error"});
