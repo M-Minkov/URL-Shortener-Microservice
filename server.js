@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const dns = require('dns');
 const cors = require('cors');
 const app = express();
 const mongoose = require("mongoose")
@@ -43,6 +44,19 @@ const urlSchema = new Schema({
 let urlModel = mongoose.model('urlModel', urlSchema);
 
 
+function isValidHttpUrl(string) {
+  let url;
+  
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;  
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
+
 // Function checks if URL already exists, if not, checks how many are saved and autoincrements short_url for unique url
 async function createAndSaveUrl(url_to_shorten) {
   try {
@@ -76,9 +90,15 @@ async function createAndSaveUrl(url_to_shorten) {
 
 async function retrieve_url(req, res) {
   let url_to_shorten = req.body.url;
-  let shortened = await createAndSaveUrl(url_to_shorten);
-  // console.log(shortened);
-  res.json({"original_url": url_to_shorten, "short_url":shortened});
+  if(!isValidHttpUrl(url_to_shorten)) {
+    res.json({ error: 'invalid url' })
+    return;
+  }
+  else{
+    let shortened = await createAndSaveUrl(url_to_shorten);
+    // console.log(shortened);
+    res.json({"original_url": url_to_shorten, "short_url":shortened});
+  }
 }
 
 
